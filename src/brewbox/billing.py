@@ -161,17 +161,17 @@ class BillingService:
         issued = issued_on or self._today()
         plan = self.repo.plans[subscription.plan_code]
 
-        # Mid-month starts use a simple 30-day convention. Add-ons are charged
-        # in full on the first invoice.
-        if subscription.start_date <= period_start:
-            factor = Decimal("1")
-        else:
-            billable_days = (period_end - subscription.start_date).days
-            factor = Decimal(billable_days) / Decimal("30")
-
-        plan_amount = money(plan.monthly_price * factor)
+        # Proration = active calendar days / real days in the month. The start
+        # day counts, and add-ons use the same factor as the plan.
+        days_in_month = (period_end - period_start).days + 1
+        plan_amount = self._prorate(plan.monthly_price, active_days, days_in_month)
         addon_amounts = [
-            (self.repo.addons[code], money(self.repo.addons[code].monthly_price))
+            (
+                self.repo.addons[code],
+                self._prorate(
+                    self.repo.addons[code].monthly_price, active_days, days_in_month
+                ),
+            )
             for code in subscription.addon_codes
         ]
         subtotal = money(plan_amount + sum((amount for _, amount in addon_amounts), Decimal("0")))
@@ -304,6 +304,14 @@ class BillingService:
     def _month_bounds(year: int, month: int) -> tuple[date, date]:
         last_day = calendar.monthrange(year, month)[1]
         return date(year, month, 1), date(year, month, last_day)
+
+    @staticmethod
+    def _prorate(price: Decimal, active_days: int, days_in_month: int) -> Decimal:
+        """price * active_days / days_in_month, rounded half-up to cents.
+
+        Multiply before dividing so a full month is exactly the list price.
+        """
+        return money(price * Decimal(active_days) / Decimal(days_in_month))
 
     @staticmethod
     def _active_days(
