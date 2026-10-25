@@ -8,6 +8,7 @@ from enum import Enum
 CENT = Decimal("0.01")
 TAX_RATE = Decimal("0.0825")
 LATE_FEE = Decimal("10.00")
+LATE_FEE_GRACE_DAYS = 5
 MAX_DISCOUNT_PERCENT = Decimal("30")
 REFERRAL_RATE = Decimal("0.10")
 MAX_REFERRAL_CREDIT = Decimal("50.00")
