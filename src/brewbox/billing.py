@@ -2,11 +2,12 @@ from __future__ import annotations
 
 import calendar
 from datetime import date, timedelta
-from decimal import Decimal
+from decimal import Decimal, InvalidOperation
 from typing import Callable
 
 from .models import (
     LATE_FEE,
+    MAX_DISCOUNT_PERCENT,
     TAX_RATE,
     CreditEntry,
     Customer,
@@ -92,9 +93,19 @@ class BillingService:
         if unknown:
             raise ValueError(f"unknown add-on(s): {', '.join(unknown)}")
 
-        discount = Decimal(str(discount_percent))
+        try:
+            discount = Decimal(str(discount_percent))
+        except InvalidOperation:
+            raise ValueError("discount must be a number") from None
+        if not discount.is_finite():
+            raise ValueError("discount must be a finite number")
         if discount < 0:
             raise ValueError("discount cannot be negative")
+        # Above the cap is a validation error, never silently clamped (thread 1).
+        if discount > MAX_DISCOUNT_PERCENT:
+            raise ValueError(
+                f"discount cannot be greater than {MAX_DISCOUNT_PERCENT}%"
+            )
 
         subscription = Subscription(
             id=self.repo.next_id("sub"),
@@ -165,9 +176,10 @@ class BillingService:
         ]
         subtotal = money(plan_amount + sum((amount for _, amount in addon_amounts), Decimal("0")))
 
-        # Discount is currently calculated from the whole recurring subtotal.
+        # Add-ons are never discounted: the discount is a percentage of the
+        # (prorated, already rounded) plan amount only.
         discount_total = money(
-            subtotal * subscription.discount_percent / Decimal("100")
+            plan_amount * subscription.discount_percent / Decimal("100")
         )
         taxable = money(subtotal - discount_total)
         tax_total = money(taxable * TAX_RATE)
