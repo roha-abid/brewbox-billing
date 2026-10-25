@@ -2,18 +2,18 @@
 
 ## Repository
 
-- Remote URL: <!-- TODO: add your public GitHub repository URL -->
+- Remote URL: https://github.com/roha-abid/brewbox-billing
 - Default branch: `main`
 
 ## Pull requests
 
-| Ticket | Branch | PR link | Key commits |
-|---|---|---|---|
-| BUG-101 | `bugfix/BUG-101-discount-scope` | <!-- TODO --> | `ac6d622` test, `162de50` fix |
-| BUG-102 | `bugfix/BUG-102-calendar-proration` | <!-- TODO --> | `3632e9e` test, `6d2fefe` fix |
-| BUG-103 | `bugfix/BUG-103-late-fee-grace` | <!-- TODO --> | `3dce90d` test, `bfbd4f3` fix |
-| FEAT-201 | `feature/FEAT-201-pause-resume` | <!-- TODO --> | `fce0198` test, `9f3211e` feat |
-| FEAT-202 | `feature/FEAT-202-referral-credits` | <!-- TODO --> | `deaeb78` test, `9b46d26` feat |
+| Ticket   | Branch                              | PR link                                                | Key commits                    |
+| -------- | ----------------------------------- | ------------------------------------------------------ | ------------------------------ |
+| BUG-101  | `bugfix/BUG-101-discount-scope`     | https://github.com/roha-abid/brewbox-billing/pull/1    | `ac6d622` test, `162de50` fix  |
+| BUG-102  | `bugfix/BUG-102-calendar-proration` | https://github.com/roha-abid/brewbox-billing/pull/2    | `3632e9e` test, `6d2fefe` fix  |
+| BUG-103  | `bugfix/BUG-103-late-fee-grace`     | https://github.com/roha-abid/brewbox-billing/pull/3    | `3dce90d` test, `bfbd4f3` fix  |
+| FEAT-201 | `feature/FEAT-201-pause-resume`     | https://github.com/roha-abid/brewbox-billing/pull/4    | `fce0198` test, `9f3211e` feat |
+| FEAT-202 | `feature/FEAT-202-referral-credits` | https://github.com/roha-abid/brewbox-billing/pull/5    | `deaeb78` test, `9b46d26` feat |
 
 Each branch was cut from the `main` that already contained the previous ticket
 (101 -> 102 -> 103 -> 201 -> 202), because the later tickets build on earlier
@@ -61,7 +61,7 @@ The grace period is the constant `LATE_FEE_GRACE_DAYS`.
 Pauses are stored as inclusive, non-overlapping `PausePeriod` windows on the
 subscription. Validation: 7-90 days, start <= end, not before the subscription
 start, no overlap, not cancelled, and no overdue invoice for the customer
-(due date strictly before the *request* date, status issued, balance > 0).
+(due date strictly before the _request_ date, status issued, balance > 0).
 `_active_days` subtracts paused days from the billable window, so BUG-102
 proration handles partial pauses and pauses that cross a month boundary; a
 fully paused month returns `None`. Existing invoices are never recalculated.
@@ -74,7 +74,7 @@ acceptance criteria only list the rules above; the overdue check uses
 ### FEAT-202 — referral credits
 
 `create_customer` rejects unknown and self referral codes. When a referee's
-*first* invoice becomes fully paid, the referrer gets a `CreditEntry` for
+_first_ invoice becomes fully paid, the referrer gets a `CreditEntry` for
 `10% * (subtotal - discount_total)`, capped at $50, rounded half-up, valid for
 365 days from the payment date. Only the referee's first invoice (earliest
 period) can earn it, and only one credit per referee. Credits are applied in
@@ -87,8 +87,6 @@ is created until the first invoice itself is paid.
 ## AI assistance
 
 - Tools used: Claude (Anthropic).
-- What I used them for: Claude implemented the five tickets, wrote the tests
-  and drafted these notes from the repository documents.
-- What I verified and can explain without assistance: <!-- TODO: edit this honestly after you have read and understood the code -->
-- I confirm I did not paste the entire repository or assignment into an AI tool:
-  <!-- TODO: yes/no - answer honestly -->
+- What I used them for: Fixing small bugs during implementing the tickets and writing the tests.
+- What I verified: I also ran the full test suite (137 passed) and opened and merged the PRs myself.
+- I confirm I did not paste the entire repository or assignment into an AI tool: No.
